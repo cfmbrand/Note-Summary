@@ -1,0 +1,22 @@
+# Note Summary Configuration
+# Copy this file to config.yaml and fill in your values
+
+azure:
+  # Azure App Registration details
+  # Create at: https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+  client_id: "YOUR_CLIENT_ID"
+  tenant_id: "YOUR_TENANT_ID"  # Use "common" for personal accounts
+
+email:
+  # Subject pattern to match (emails starting with this will be processed)
+  subject_pattern: "[Note]"
+  # How far back to look for emails (in hours)
+  lookback_hours: 24
+  # Whether to mark processed emails as read
+  mark_as_read: true
+
+onenote:
+  # Name of the notebook to store notes in
+  notebook_name: "Email Notes"
+  # Name of the section within the notebook
+  section_name: "Captured Notes"
