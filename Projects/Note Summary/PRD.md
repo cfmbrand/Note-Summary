@@ -34,7 +34,12 @@
   ├── data/                          # Token cache + SQLite DB (gitignored)                                                                                                                                            
   ├── scripts/                                                                                                                                                                                                         
   │   └── com.user.note-summary.plist  # launchd scheduled task                                                                                                                                                        
-  ├── requirements.txt                                                                                                                                                                                                 
+  ├── tests/
+  │   ├── conftest.py               # Shared pytest fixtures
+  │   ├── test_config.py            # Config loading tests
+  │   ├── test_email_processor.py   # Email processing tests
+  │   └── test_processed_tracker.py # SQLite tracker tests
+  ├── requirements.txt
   └── pyproject.toml                                                                                                                                                                                                   
   ```                                                                                                                                                                                                                  
                                                                                                                                                                                                                        
@@ -42,14 +47,18 @@
                                                                                                                                                                                                                        
   ## Implementation Steps                                                                                                                                                                                              
                                                                                                                                                                                                                        
-  ### Step 1: Azure App Registration (One-time Setup)                                                                                                                                                                  
-  1. Go to Azure Portal → App registrations → New registration                                                                                                                                                         
-  2. Name: "Note Summary"                                                                                                                                                                                              
-  3. Set "Allow public client flows" to Yes                                                                                                                                                                            
-  4. Add API permissions (delegated):                                                                                                                                                                                  
-  - `Mail.Read`, `Mail.ReadWrite`                                                                                                                                                                                      
-  - `Notes.Create`, `Notes.ReadWrite`                                                                                                                                                                                  
-  - `User.Read`                                                                                                                                                                                                        
+  ### Step 1: Azure App Registration (One-time Setup)
+  1. Go to Azure Portal → App registrations → New registration
+  2. Name: "Note Summary"
+  3. Set "Allow public client flows" to Yes
+  4. Add API permissions (delegated):
+     - `Mail.Read`, `Mail.ReadWrite`
+     - `Notes.Create`, `Notes.ReadWrite`
+     - `User.Read`
+
+  **Note (Corporate Environments):** If your organization uses Conditional Access policies,
+  you may need IT to either exempt this app from device compliance requirements or register
+  your device with Azure AD/Intune. Error code 53003 indicates a Conditional Access block.                                                                                                                                                                                                        
                                                                                                                                                                                                                        
   ### Step 2: Project Setup                                                                                                                                                                                            
   - Create directory structure                                                                                                                                                                                         
@@ -110,10 +119,11 @@
                                                                                                                                                                                                                        
   ---                                                                                                                                                                                                                  
                                                                                                                                                                                                                        
-  ## Dependencies                                                                                                                                                                                                      
-  - `msal` - Microsoft authentication                                                                                                                                                                                  
-  - `requests` - HTTP client for Graph API                                                                                                                                                                             
-  - `pyyaml` - Configuration parsing                                                                                                                                                                                   
+  ## Dependencies
+  - `msal` - Microsoft authentication
+  - `requests` - HTTP client for Graph API
+  - `pyyaml` - Configuration parsing
+  - `pytest` - Unit testing                                                                                                                                                                                   
                                                                                                                                                                                                                        
   ---                                                                                                                                                                                                                  
                                                                                                                                                                                                                        
@@ -133,9 +143,10 @@
                                                                                                                                                                                                                        
   ---                                                                                                                                                                                                                  
                                                                                                                                                                                                                        
-  ## Verification Plan                                                                                                                                                                                                 
-  1. **Authentication test**: Run `python src/main.py --auth-only` and verify browser auth flow                                                                                                                        
-  2. **Notebook discovery**: Run `python src/main.py --list-notebooks` to see OneNote structure                                                                                                                        
-  3. **End-to-end test**: Send email with subject `[Note] Test note` to yourself, run the script, verify page created in OneNote                                                                                       
-  4. **Duplicate prevention**: Run script again, verify same email not processed twice                                                                                                                                 
-  5. **Scheduled run**: Install launchd plist, verify automatic processing    
+  ## Verification Plan
+  1. **Unit tests**: Run `pytest tests/ -v` to verify core logic
+  2. **Authentication test**: Run `python -m src.main --auth-only` and verify device code auth flow
+  3. **Notebook discovery**: Run `python -m src.main --list-notebooks` to see OneNote structure
+  4. **End-to-end test**: Send email with subject `[Note] Test note` to yourself, run the script, verify page created in OneNote
+  5. **Duplicate prevention**: Run script again, verify same email not processed twice
+  6. **Scheduled run**: Install launchd plist, verify automatic processing    
