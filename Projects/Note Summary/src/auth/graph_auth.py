@@ -1,4 +1,4 @@
-"""Microsoft Graph API authentication using MSAL device code flow."""
+"""Microsoft Graph API authentication using MSAL interactive browser flow."""
 
 import sys
 from typing import Optional
@@ -63,31 +63,33 @@ class GraphAuth:
         if not interactive:
             return None
 
-        # No cached token, use device code flow
-        return self._authenticate_device_code()
+        # No cached token, use interactive browser flow
+        return self._authenticate_interactive()
 
-    def _authenticate_device_code(self) -> Optional[str]:
-        """Authenticate using device code flow.
+    def _authenticate_interactive(self) -> Optional[str]:
+        """Authenticate using interactive browser flow.
+
+        Opens the system browser for authentication and handles
+        the redirect to localhost automatically.
 
         Returns:
             Access token string, or None if authentication failed.
         """
-        flow = self._app.initiate_device_flow(scopes=GRAPH_SCOPES)
-
-        if "user_code" not in flow:
-            print(f"Failed to create device flow: {flow.get('error_description', 'Unknown error')}")
-            return None
-
-        # Display instructions to user
         print("\n" + "=" * 60)
         print("AUTHENTICATION REQUIRED")
         print("=" * 60)
-        print(f"\n{flow['message']}\n")
+        print("\nOpening browser for authentication...")
         print("=" * 60 + "\n")
         sys.stdout.flush()
 
-        # Wait for user to complete authentication
-        result = self._app.acquire_token_by_device_flow(flow)
+        try:
+            result = self._app.acquire_token_interactive(
+                scopes=GRAPH_SCOPES,
+                prompt="select_account",
+            )
+        except Exception as e:
+            print(f"Authentication failed: {e}")
+            return None
 
         if "access_token" in result:
             self._token_cache.save()
