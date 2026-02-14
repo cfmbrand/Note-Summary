@@ -111,7 +111,7 @@ class EmailService:
         }
 
         response = requests.get(
-            f"{GRAPH_BASE_URL}/me/messages",
+            f"{GRAPH_BASE_URL}/me/mailFolders/Inbox/messages",
             headers=self._headers,
             params=params,
         )
